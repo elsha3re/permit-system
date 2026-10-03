@@ -1,0 +1,83 @@
+@{
+    var systemName = ViewBag.SystemName ?? "نظام تصاريح الدخول";
+    var theme = ViewBag.Theme;
+    var cu = ViewBag.CurrentUser;
+    var screens = ViewBag.Screens as System.Collections.IEnumerable;
+    var lookups = ViewBag.Lookups;
+    var branches = ViewBag.Branches;
+    var buildings = ViewBag.Buildings;
+}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@systemName</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+<div class="topbar" id="mainTopbar">
+  <button class="btn bg2 bxs menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+  <div class="topbar-logo">
+    <div class="topbar-logo-ico" id="topbarLogoIco">🛡️</div>
+    <span id="topbarSystemName">@systemName</span>
+  </div>
+  <div class="topbar-nav" id="topbarNav"></div>
+  <div class="topbar-right">
+    <div class="user-badge">
+      <div class="user-avatar" id="topUserAvatar">@(cu?.Avatar ?? "؟")</div>
+      <div>
+        <div class="user-name" id="topUserName">@(cu?.Name ?? "—")</div>
+        <div class="user-dept" id="topUserRoleLabel">@(cu?.Role ?? "—")</div>
+      </div>
+    </div>
+    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
+      @Html.AntiForgeryToken()
+      <button type="submit" class="topbar-action-btn danger">🚪 <span>خروج</span></button>
+    </form>
+  </div>
+</div>
+
+<div class="app-body" id="mainAppBody">
+  <div class="sidebar" id="mainSidebar"></div>
+  <div class="content" id="mainContent">
+    @RenderBody()
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  window.__BOOTSTRAP__ = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+      system = new {
+          name = systemName,
+          logo = ViewBag.SystemLogo as string
+      },
+      theme = new {
+          colors = new {
+              gd = theme?.Gd,
+              gm = theme?.Gm,
+              gmi = theme?.Gmi,
+              gp = theme?.Gp,
+              glight = theme?.Glight,
+              au = theme?.Au,
+              aul = theme?.Aul,
+              aub = theme?.Aub
+          }
+      },
+      user = cu,
+      screens = screens,
+      lookups = lookups,
+      branches = branches,
+      buildings = buildings
+  }, new System.Text.Json.JsonSerializerOptions {
+      Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+  }));
+</script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/screens/branches.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
